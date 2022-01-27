@@ -6,21 +6,24 @@ const enableButton = document.getElementById('enableMM');
 const setMessageButton = document.getElementById('setMessageButton');
 const address = document.getElementById('address');
 
+const contractAddress = '0xeF8c71AEA425BB2Ae8465B9351c44c8744Cdc088';
+
 let userAccount;
 let web3;
 
+
 async function enableMeta() {
     let accounts = await ethereum.request({method: 'eth_requestAccounts'});
-    enableButton.disabled = true;
-    enableButton.innerText = 'Connected';
-    userAccount = accounts[0].toString();
-    address.innerText = userAccount;
+    if (ethereum.isConnected()) {
+        enableButton.disabled = true;
+        enableButton.innerText = 'Connected';
+        userAccount = accounts[0].toString();
+        address.innerText = userAccount;
+    }
 }
 async function setMessage() {
     let input = document.getElementById('userInput').value;
-    console.log(`pre enable check: ${input}`);
     if (ethereum.isConnected()) {
-        console.log(`post enable check: ${input}`);
         Contract.setProvider(window.ethereum);
         let contract = new Contract(
             [
@@ -50,14 +53,12 @@ async function setMessage() {
                     "stateMutability": "nonpayable",
                     "type": "function"
                 }
-            ], '0x71b6A538b69E5648644a1516321d23FE3b2AA740'
+            ], contractAddress
         );
-        contract.methods.setMessage(input).send({from: userAccount.toString()}).on('receipt', function () {
+        contract.methods.setMessage(input).send({from: userAccount}).on('receipt', function () {
             address.innerText = `Your message "${input}" was posted to the blockchain!`;
         })
-
     }
-    // TODO: Set message via the Solidity contract.
 }
 
 enableButton.addEventListener('click', function () {
